@@ -36,5 +36,5 @@ class MainActivity : ComponentActivity() {
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun App(modifier: Modifier = Modifier) {
-    AppNavigationController(modifier = modifier)
+    AppNavigationController()
 }

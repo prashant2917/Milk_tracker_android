@@ -1,5 +1,6 @@
 package com.swarajya.milktracker.tracker.presentation
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
@@ -9,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
 import com.swarajya.milktracker.R
 import com.swarajya.milktracker.common.constants.AppConstants
 import com.swarajya.milktracker.common.presentation.theme.*
@@ -18,17 +20,19 @@ import com.swarajya.milktracker.common.presentation.theme.*
 fun AddMilkBottomSheet(
     selectedDate: String,
     onDismiss: () -> Unit,
-    initialMorningQty: Float = 1.0f,
+    initialMorningQty: Float = 0.0f,
     initialEveningQty: Float = 0.0f,
     initialPrice: Float = 60.0f,
     onSave: (morningQty: Float, eveningQty: Float, price: Float) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState()
     
-    // Starting quantities based on initial values
     var morningQty by remember { mutableFloatStateOf(initialMorningQty) }
     var eveningQty by remember { mutableFloatStateOf(initialEveningQty) }
     var pricePerLiter by remember { mutableStateOf(initialPrice.toString()) }
+
+    // Logic: Save is only enabled if at least one quantity is > 0
+    val isSaveEnabled = morningQty > 0f || eveningQty > 0f
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -51,7 +55,6 @@ fun AddMilkBottomSheet(
             
             Spacer(modifier = Modifier.height(DIMENSIONS_24DP))
 
-            // Morning Input Row
             QuantitySelector(
                 label = stringResource(id = R.string.morning), 
                 quantity = morningQty, 
@@ -60,7 +63,6 @@ fun AddMilkBottomSheet(
             
             Spacer(modifier = Modifier.height(DIMENSIONS_16DP))
             
-            // Evening Input Row
             QuantitySelector(
                 label = stringResource(id = R.string.evening), 
                 quantity = eveningQty, 
@@ -70,7 +72,6 @@ fun AddMilkBottomSheet(
             HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
             Spacer(modifier = Modifier.height(DIMENSIONS_24DP))
 
-            // Price Per Liter Input
             OutlinedTextField(
                 value = pricePerLiter,
                 onValueChange = { newValue ->
@@ -86,20 +87,42 @@ fun AddMilkBottomSheet(
 
             Spacer(modifier = Modifier.height(DIMENSIONS_32DP))
 
-            Button(
-                onClick = {
-                    val finalPrice = pricePerLiter.toFloatOrNull() ?: initialPrice
-                    onSave(morningQty, eveningQty, finalPrice)
-                    onDismiss()
-                },
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.medium
+                horizontalArrangement = Arrangement.spacedBy(DIMENSIONS_16DP)
             ) {
-                Text(
-                    text = stringResource(id = R.string.save_log),
-                    modifier = Modifier.padding(vertical = DIMENSIONS_8DP),
-                    style = MaterialTheme.typography.titleMedium
-                )
+                OutlinedButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.weight(1f),
+                    shape = MaterialTheme.shapes.medium,
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.cancel),
+                        modifier = Modifier.padding(vertical = DIMENSIONS_8DP),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
+
+                Button(
+                    onClick = {
+                        val finalPrice = pricePerLiter.toFloatOrNull() ?: initialPrice
+                        onSave(morningQty, eveningQty, finalPrice)
+                        onDismiss()
+                    },
+                    modifier = Modifier.weight(1f),
+                    shape = MaterialTheme.shapes.medium,
+                    enabled = isSaveEnabled
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.save_log),
+                        modifier = Modifier.padding(vertical = DIMENSIONS_8DP),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
             }
         }
     }

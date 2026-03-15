@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.YearMonth
 import javax.inject.Inject
-
+@RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 class TrackerViewModel @Inject constructor(
     private val insertOrUpdateLogUseCase: InsertOrUpdateLogUseCase,
@@ -25,8 +25,12 @@ class TrackerViewModel @Inject constructor(
     private val _showBottomSheet = MutableStateFlow(false)
     val showBottomSheet: StateFlow<Boolean> = _showBottomSheet.asStateFlow()
 
+
     private val _currentMonth = MutableStateFlow(YearMonth.now())
     val currentMonth: StateFlow<YearMonth> = _currentMonth.asStateFlow()
+
+    private val _uiEvent = MutableSharedFlow<UiEvent>()
+    val uiEvent = _uiEvent.asSharedFlow()
 
     @RequiresApi(Build.VERSION_CODES.O)
     val milkLogs: StateFlow<Map<LocalDate, MilkLogEntity>> = _currentMonth
@@ -47,15 +51,28 @@ class TrackerViewModel @Inject constructor(
     }
 
     fun saveMilkLog(date: String, morningQty: Float, eveningQty: Float, price: Float) {
+        // Guard check: Only save if at least one quantity is > 0
+        if (morningQty <= 0f && eveningQty <= 0f) return
+
         viewModelScope.launch {
-            insertOrUpdateLogUseCase(
-                MilkLogEntity(
-                    date = date,
-                    morningQty = morningQty,
-                    eveningQty = eveningQty,
-                    pricePerLiter = price
+            try {
+                insertOrUpdateLogUseCase(
+                    MilkLogEntity(
+                        date = date,
+                        morningQty = morningQty,
+                        eveningQty = eveningQty,
+                        pricePerLiter = price
+                    )
                 )
-            )
+                _uiEvent.emit(UiEvent.Success)
+            } catch (e: Exception) {
+                _uiEvent.emit(UiEvent.Error)
+            }
         }
+    }
+
+    sealed class UiEvent {
+        object Success : UiEvent()
+        object Error : UiEvent()
     }
 }

@@ -4,7 +4,14 @@
     <string name="morning">Morning</string>
     <string name="evening">Evening</string>
     <string name="save_log">Save Log</string>
+    <string name="cancel">Cancel</string>
     <string name="quantity_liters">%1$.1fL</string>
     <string name="logging_ui_placeholder">Logging UI goes here</string>
     <string name="price_per_liter">Price per Liter (₹)</string>
+    <string name="save_success">Data saved successfully!</string>
+    <string name="save_error">Failed to save data. Please try again.</string>
+    <string name="total_quantity">Total: %1$.1fL</string>
+    <string name="total_amount">Total: ₹%1$.1f</string>
+    <string name="monthly_summary">Monthly Summary</string>
+
 </resources>

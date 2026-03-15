@@ -5,6 +5,7 @@ import androidx.compose.ui.unit.dp
 // Standard Dimension Constants
 val DIMENSIONS_2DP = 2.dp
 val DIMENSIONS_4DP = 4.dp
+val DIMENSIONS_6DP = 6.dp
 val DIMENSIONS_8DP = 8.dp
 val DIMENSIONS_14DP = 14.dp
 val DIMENSIONS_16DP = 16.dp
