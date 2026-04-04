@@ -7,4 +7,5 @@ interface TrackerRepository {
     suspend fun insertOrUpdateLog(log: MilkLogEntity)
     fun getLogForDate(date: String): Flow<MilkLogEntity?>
     fun getLogsForMonth(yearMonth: String): Flow<List<MilkLogEntity>>
+    suspend fun deleteLogForDate(date: String)
 }

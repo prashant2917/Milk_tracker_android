@@ -7,3 +7,6 @@ object Splash
 
 @Serializable
 object MonthlyCalendar
+
+@Serializable
+object Settings

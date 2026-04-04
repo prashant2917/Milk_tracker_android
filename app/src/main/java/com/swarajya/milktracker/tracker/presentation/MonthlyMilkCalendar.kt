@@ -191,6 +191,9 @@ fun MonthlyMilkCalendar(
                             eveningQty = evening,
                             price = price
                         )
+                    },
+                    onDelete = {
+                        viewModel.deleteMilkLog(selectedDate.toString())
                     }
                 )
             }

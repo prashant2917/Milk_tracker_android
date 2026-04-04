@@ -21,4 +21,8 @@ class TrackerRepositoryImpl @Inject constructor(
     override fun getLogsForMonth(yearMonth: String): Flow<List<MilkLogEntity>> {
         return dao.getLogsForMonth(yearMonth)
     }
+
+    override suspend fun deleteLogForDate(date: String) {
+        dao.deleteLogForDate(date)
+    }
 }

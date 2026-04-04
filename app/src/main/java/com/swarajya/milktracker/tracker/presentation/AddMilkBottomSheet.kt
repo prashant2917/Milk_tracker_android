@@ -3,6 +3,8 @@ package com.swarajya.milktracker.tracker.presentation
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,7 +25,8 @@ fun AddMilkBottomSheet(
     initialMorningQty: Float = 0.0f,
     initialEveningQty: Float = 0.0f,
     initialPrice: Float = 60.0f,
-    onSave: (morningQty: Float, eveningQty: Float, price: Float) -> Unit
+    onSave: (morningQty: Float, eveningQty: Float, price: Float) -> Unit,
+    onDelete: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState()
     
@@ -33,6 +36,7 @@ fun AddMilkBottomSheet(
 
     // Logic: Save is only enabled if at least one quantity is > 0
     val isSaveEnabled = morningQty > 0f || eveningQty > 0f
+    val showDeleteIcon = initialMorningQty > 0f || initialEveningQty > 0f
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -46,12 +50,29 @@ fun AddMilkBottomSheet(
                 .padding(bottom = DIMENSIONS_48DP),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = stringResource(id = R.string.log_milk_for, selectedDate), 
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = stringResource(id = R.string.log_milk_for, selectedDate), 
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f)
+                )
+
+                if (showDeleteIcon) {
+                    IconButton(onClick = onDelete) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete Log",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+            }
             
             Spacer(modifier = Modifier.height(DIMENSIONS_24DP))
 

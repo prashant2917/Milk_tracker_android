@@ -2,8 +2,10 @@ package com.swarajya.milktracker.common.presentation
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -11,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -19,7 +20,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.swarajya.milktracker.R
 import com.swarajya.milktracker.common.navigation.MonthlyCalendar
+import com.swarajya.milktracker.common.navigation.Settings
 import com.swarajya.milktracker.common.navigation.Splash
+import com.swarajya.milktracker.settings.presentation.SettingsScreen
 import com.swarajya.milktracker.splash.presentation.SplashScreen
 import com.swarajya.milktracker.tracker.presentation.MonthlyMilkCalendar
 
@@ -32,6 +35,7 @@ fun AppNavigationController() {
     val currentDestination = navBackStackEntry?.destination
 
     val showTopBar = currentDestination?.hasRoute<Splash>() == false
+    val isSettingsScreen = currentDestination?.hasRoute<Settings>() == true
 
     Scaffold(
         topBar = {
@@ -39,17 +43,36 @@ fun AppNavigationController() {
                 CenterAlignedTopAppBar(
                     title = {
                         Text(
-                            text = stringResource(id = R.string.app_name),
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center
+                            text = if (isSettingsScreen) stringResource(id = R.string.settings) 
+                                   else stringResource(id = R.string.app_name),
+                            fontWeight = FontWeight.Bold
                         )
                     },
+                    navigationIcon = {
+                        if (isSettingsScreen) {
+                            IconButton(onClick = { navController.navigateUp() }) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "Back"
+                                )
+                            }
+                        }
+                    },
+                    actions = {
+                        if (!isSettingsScreen) {
+                            IconButton(onClick = { navController.navigate(Settings) }) {
+                                Icon(
+                                    imageVector = Icons.Default.Settings,
+                                    contentDescription = "Settings"
+                                )
+                            }
+                        }
+                    },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        scrolledContainerColor = Color.Unspecified,
-                        navigationIconContentColor = Color.Unspecified,
-                        titleContentColor = Color.White,
-                        actionIconContentColor = Color.Unspecified
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        navigationIconContentColor = MaterialTheme.colorScheme.primary,
+                        titleContentColor = MaterialTheme.colorScheme.primary,
+                        actionIconContentColor = MaterialTheme.colorScheme.primary
                     )
                 )
             }
@@ -71,6 +94,9 @@ fun AppNavigationController() {
             }
             composable<MonthlyCalendar> {
                 MonthlyMilkCalendar()
+            }
+            composable<Settings> {
+                SettingsScreen()
             }
         }
     }

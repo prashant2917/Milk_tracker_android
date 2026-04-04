@@ -25,9 +25,11 @@ interface MilkLogDao {
     fun getLogForDate(date: String): Flow<MilkLogEntity?>
 
     // Get all logs for a specific month to calculate the monthly bill
-    // Using the "LIKE 'YYYY-MM-%'" SQL feature makes this very efficient
     @Query("SELECT * FROM daily_milk_logs WHERE date LIKE :yearMonth || '%'")
     fun getLogsForMonth(yearMonth: String): Flow<List<MilkLogEntity>>
+
+    @Query("DELETE FROM daily_milk_logs WHERE date = :date")
+    suspend fun deleteLogForDate(date: String)
 }
 
 // 3. The Database Setup
