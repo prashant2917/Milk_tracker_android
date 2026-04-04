@@ -1,6 +1,9 @@
 package com.swarajya.milktracker.common.presentation
 
+import android.Manifest
 import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -8,9 +11,9 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -36,6 +39,14 @@ fun AppNavigationController() {
 
     val showTopBar = currentDestination?.hasRoute<Splash>() == false
     val isSettingsScreen = currentDestination?.hasRoute<Settings>() == true
+
+    // Notification Permission Launcher for Android 13+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { isGranted ->
+            // Optionally handle permission result (e.g., update a state or show a message)
+        }
+    )
 
     Scaffold(
         topBar = {
@@ -93,6 +104,12 @@ fun AppNavigationController() {
                 )
             }
             composable<MonthlyCalendar> {
+                // Request permission when the calendar screen is first shown (after splash)
+                LaunchedEffect(Unit) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    }
+                }
                 MonthlyMilkCalendar()
             }
             composable<Settings> {

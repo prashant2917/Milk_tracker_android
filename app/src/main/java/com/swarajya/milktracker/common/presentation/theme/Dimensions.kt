@@ -3,6 +3,7 @@ package com.swarajya.milktracker.common.presentation.theme
 import androidx.compose.ui.unit.dp
 
 // Standard Dimension Constants
+val DIMENSIONS_0DP = 0.dp
 val DIMENSIONS_2DP = 2.dp
 val DIMENSIONS_4DP = 4.dp
 val DIMENSIONS_6DP = 6.dp

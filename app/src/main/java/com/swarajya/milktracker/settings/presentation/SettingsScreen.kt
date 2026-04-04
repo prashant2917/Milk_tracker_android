@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -22,6 +23,7 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val themePreference by viewModel.isDarkTheme.collectAsStateWithLifecycle()
+    val isNotificationsEnabled by viewModel.isNotificationsEnabled.collectAsStateWithLifecycle()
     val currentThemeIsDark = themePreference ?: isSystemInDarkTheme()
 
     Column(
@@ -44,6 +46,24 @@ fun SettingsScreen(
             Switch(
                 checked = currentThemeIsDark,
                 onCheckedChange = { viewModel.onThemeChanged(it) }
+            )
+        }
+
+        // Notification Toggle
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = DIMENSIONS_8DP),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = stringResource(id = R.string.notifications),
+                style = MaterialTheme.typography.bodyLarge
+            )
+            Switch(
+                checked = isNotificationsEnabled,
+                onCheckedChange = { viewModel.onNotificationToggle(it) }
             )
         }
 
