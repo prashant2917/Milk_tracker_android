@@ -39,7 +39,8 @@ jobs:
       # 5️⃣ Decode Keystore
       - name: Decode Keystore
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > keystore.jks
+          mkdir -p app
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > app/keystore.jks
 
       # 6️⃣ Build
       - name: Build Project
