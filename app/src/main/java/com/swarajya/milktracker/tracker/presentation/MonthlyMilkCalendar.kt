@@ -51,7 +51,10 @@ fun MonthlyMilkCalendar(
     val today = LocalDate.now()
 
     val snackbarHostState = remember { SnackbarHostState() }
-    val context = LocalContext.current
+    
+    // Fix: Query string resources in the Composable scope to avoid Lint error
+    val saveSuccessMessage = stringResource(id = R.string.save_success)
+    val saveErrorMessage = stringResource(id = R.string.save_error)
 
     // Calculate Monthly Totals
     val totalQuantity = milkLogs.values.sumOf { (it.morningQty + it.eveningQty).toDouble() }.toFloat()
@@ -62,12 +65,12 @@ fun MonthlyMilkCalendar(
             when (event) {
                 is TrackerViewModel.UiEvent.Success -> {
                     snackbarHostState.showSnackbar(
-                        message = context.getString(R.string.save_success)
+                        message = saveSuccessMessage
                     )
                 }
                 is TrackerViewModel.UiEvent.Error -> {
                     snackbarHostState.showSnackbar(
-                        message = context.getString(R.string.save_error)
+                        message = saveErrorMessage
                     )
                 }
             }
