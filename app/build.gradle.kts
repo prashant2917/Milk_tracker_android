@@ -33,7 +33,6 @@ android {
         debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
-            // Assigning a significantly different versionCode for debug builds
         }
     }
     compileOptions {
