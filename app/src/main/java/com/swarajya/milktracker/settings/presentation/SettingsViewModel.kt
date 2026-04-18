@@ -26,6 +26,9 @@ class SettingsViewModel @Inject constructor(
     val isNotificationsEnabled: StateFlow<Boolean> = preferenceManager.isNotificationsEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
+    val defaultPrice: StateFlow<Float> = preferenceManager.pricePerLitre
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 60.0f)
+
     fun onThemeChanged(isDark: Boolean) {
         themeManager.setTheme(isDark)
     }
@@ -33,6 +36,12 @@ class SettingsViewModel @Inject constructor(
     fun onNotificationToggle(enabled: Boolean) {
         viewModelScope.launch {
             preferenceManager.setNotificationsEnabled(enabled)
+        }
+    }
+
+    fun onPriceChanged(price: Float) {
+        viewModelScope.launch {
+            preferenceManager.setPricePerLitre(price)
         }
     }
 

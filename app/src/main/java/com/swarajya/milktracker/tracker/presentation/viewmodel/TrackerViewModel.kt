@@ -4,9 +4,9 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.swarajya.milktracker.common.data.manager.PreferenceManager
 import com.swarajya.milktracker.tracker.data.MilkLogEntity
 import com.swarajya.milktracker.tracker.domain.usecase.DeleteLogUseCase
-import com.swarajya.milktracker.tracker.domain.usecase.GetLogForDateUseCase
 import com.swarajya.milktracker.tracker.domain.usecase.GetLogsForMonthUseCase
 import com.swarajya.milktracker.tracker.domain.usecase.InsertOrUpdateLogUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,9 +20,9 @@ import javax.inject.Inject
 @HiltViewModel
 class TrackerViewModel @Inject constructor(
     private val insertOrUpdateLogUseCase: InsertOrUpdateLogUseCase,
-    private val getLogForDateUseCase: GetLogForDateUseCase,
     private val getLogsForMonthUseCase: GetLogsForMonthUseCase,
-    private val deleteLogUseCase: DeleteLogUseCase
+    private val deleteLogUseCase: DeleteLogUseCase,
+    preferenceManager: PreferenceManager
 ) : ViewModel() {
 
     private val _showBottomSheet = MutableStateFlow(false)
@@ -42,6 +42,9 @@ class TrackerViewModel @Inject constructor(
             logs.associateBy { LocalDate.parse(it.date) }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
+
+    val defaultPrice: StateFlow<Float> = preferenceManager.pricePerLitre
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 60.0f)
 
     fun onToggleBottomSheet(show: Boolean) {
         _showBottomSheet.value = show
@@ -84,7 +87,7 @@ class TrackerViewModel @Inject constructor(
     }
 
     sealed class UiEvent {
-        object Success : UiEvent()
-        object Error : UiEvent()
+        data object Success : UiEvent()
+        data object Error : UiEvent()
     }
 }
