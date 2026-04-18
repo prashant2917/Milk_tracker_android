@@ -41,23 +41,24 @@ jobs:
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > app/keystore.jks
 
       # Build Release APK
-      - name: Build Signed Release APK
+      - name: Build Signed Release APK and AAB
         run: |
-          ./gradlew assembleRelease \
+          ./gradlew assembleRelease bundleRelease \
           -Pandroid.injected.signing.store.file=$GITHUB_WORKSPACE/app/keystore.jks \
           -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} \
           -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} \
           -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
 
-      # Move APK
+      # Move APK and AAB
       - name: Prepare output
         run: |
           mkdir -p app/release
           cp app/build/outputs/apk/release/app-release.apk app/release/
+          cp app/build/outputs/bundle/release/app-release.aab app/release/
 
       # Upload
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
           name: MilkTracker-Release
-          path: app/release/app-release.apk
+          path: app/release/
