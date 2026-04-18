@@ -1,9 +1,9 @@
 package com.swarajya.milktracker.tracker.presentation.viewmodel
 
 import app.cash.turbine.test
+import com.swarajya.milktracker.common.data.manager.PreferenceManager
 import com.swarajya.milktracker.tracker.data.MilkLogEntity
 import com.swarajya.milktracker.tracker.domain.usecase.DeleteLogUseCase
-import com.swarajya.milktracker.tracker.domain.usecase.GetLogForDateUseCase
 import com.swarajya.milktracker.tracker.domain.usecase.GetLogsForMonthUseCase
 import com.swarajya.milktracker.tracker.domain.usecase.InsertOrUpdateLogUseCase
 import kotlinx.coroutines.Dispatchers
@@ -30,11 +30,11 @@ class TrackerViewModelTest {
     @Mock
     private lateinit var insertOrUpdateLogUseCase: InsertOrUpdateLogUseCase
     @Mock
-    private lateinit var getLogForDateUseCase: GetLogForDateUseCase
-    @Mock
     private lateinit var getLogsForMonthUseCase: GetLogsForMonthUseCase
     @Mock
     private lateinit var deleteLogUseCase: DeleteLogUseCase
+    @Mock
+    private lateinit var preferenceManager: PreferenceManager
 
     private lateinit var viewModel: TrackerViewModel
 
@@ -43,14 +43,15 @@ class TrackerViewModelTest {
         MockitoAnnotations.openMocks(this)
         Dispatchers.setMain(testDispatcher)
 
-        // Default mock for milk logs to prevent crash on init
+        // Default mock behaviors
         whenever(getLogsForMonthUseCase(any())).thenReturn(flowOf(emptyList()))
+        whenever(preferenceManager.pricePerLitre).thenReturn(flowOf(60.0f))
 
         viewModel = TrackerViewModel(
             insertOrUpdateLogUseCase,
-            getLogForDateUseCase,
             getLogsForMonthUseCase,
-            deleteLogUseCase
+            deleteLogUseCase,
+            preferenceManager
         )
     }
 
@@ -132,19 +133,24 @@ class TrackerViewModelTest {
         val date = LocalDate.parse(dateStr)
         val log = MilkLogEntity(dateStr, 1.0f, 1.0f, 60.0f)
         
-        // Setup mock to return the log
         whenever(getLogsForMonthUseCase(any())).thenReturn(flowOf(listOf(log)))
 
         viewModel.milkLogs.test {
-            // 1. Initial emission from StateFlow (empty map from init)
+            // Initial emission
             assertEquals(emptyMap<LocalDate, MilkLogEntity>(), awaitItem())
             
-            // 2. Trigger change to a DIFFERENT month to force refresh
+            // Force refresh by changing month
             viewModel.onMonthChange(YearMonth.now().plusMonths(1))
             
-            // 3. Next emission should contain our log
             val result = awaitItem()
             assertEquals(log, result[date])
+        }
+    }
+
+    @Test
+    fun `defaultPrice reflects value from preferenceManager`() = runTest {
+        viewModel.defaultPrice.test {
+            assertEquals(60.0f, awaitItem())
         }
     }
 }

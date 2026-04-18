@@ -48,11 +48,11 @@ fun MonthlyMilkCalendar(
     val currentMonth by viewModel.currentMonth.collectAsStateWithLifecycle()
     val milkLogs by viewModel.milkLogs.collectAsStateWithLifecycle()
     val showBottomSheet by viewModel.showBottomSheet.collectAsStateWithLifecycle()
+    val defaultPrice by viewModel.defaultPrice.collectAsStateWithLifecycle()
     val today = LocalDate.now()
 
     val snackbarHostState = remember { SnackbarHostState() }
     
-    // Fix: Query string resources in the Composable scope to avoid Lint error
     val saveSuccessMessage = stringResource(id = R.string.save_success)
     val saveErrorMessage = stringResource(id = R.string.save_error)
 
@@ -186,7 +186,7 @@ fun MonthlyMilkCalendar(
                     onDismiss = { viewModel.onToggleBottomSheet(false) },
                     initialMorningQty = existingLog?.morningQty ?: 0.0f,
                     initialEveningQty = existingLog?.eveningQty ?: 0.0f,
-                    initialPrice = existingLog?.pricePerLiter ?: 60.0f,
+                    initialPrice = existingLog?.pricePerLiter ?: defaultPrice,
                     onSave = { morning, evening, price ->
                         viewModel.saveMilkLog(
                             date = selectedDate.toString(),
