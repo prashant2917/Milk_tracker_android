@@ -5,6 +5,8 @@ plugins {
     alias(libs.plugins.dagger.hilt.android)
     alias(libs.plugins.devtool.ksp)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
 }
 
 android {
@@ -82,6 +84,11 @@ dependencies {
 
     // DataStore
     implementation(libs.androidx.datastore.preferences)
+
+    //firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.crashlytics)
 
     testImplementation(libs.junit)
     testImplementation(libs.mockito.core)

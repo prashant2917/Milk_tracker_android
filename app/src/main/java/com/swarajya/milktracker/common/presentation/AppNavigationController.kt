@@ -32,7 +32,7 @@ import com.swarajya.milktracker.tracker.presentation.MonthlyMilkCalendar
 @OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun AppNavigationController() {
+fun AppNavigationController(modifier: Modifier) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
@@ -92,7 +92,7 @@ fun AppNavigationController() {
         NavHost(
             navController = navController,
             startDestination = Splash,
-            modifier = Modifier.padding(innerPadding)
+            modifier = modifier.padding(innerPadding)
         ) {
             composable<Splash> {
                 SplashScreen(
