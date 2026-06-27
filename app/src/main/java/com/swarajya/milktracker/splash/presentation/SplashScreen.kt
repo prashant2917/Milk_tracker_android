@@ -36,11 +36,11 @@ fun SplashScreen(
         onNavigateNext()
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = modifier.fillMaxSize()) {
         Image(
             painter = painterResource(id = R.drawable.milk_tracker_bg),
             contentDescription = null,
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
                 .blur(if (isLoadingVisible) DIMENSIONS_8DP else DIMENSIONS_0DP),
             contentScale = ContentScale.FillBounds
@@ -48,7 +48,7 @@ fun SplashScreen(
 
         if (isLoadingVisible) {
             CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.Center),
+                modifier = modifier.align(Alignment.Center),
                 color = MaterialTheme.colorScheme.primary
             )
         }

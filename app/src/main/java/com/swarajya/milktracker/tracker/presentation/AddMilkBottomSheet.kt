@@ -2,7 +2,9 @@ package com.swarajya.milktracker.tracker.presentation
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
@@ -29,6 +31,7 @@ fun AddMilkBottomSheet(
     onDelete: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState()
+    val scrollState = rememberScrollState()
     
     var morningQty by remember { mutableFloatStateOf(initialMorningQty) }
     var eveningQty by remember { mutableFloatStateOf(initialEveningQty) }
@@ -46,8 +49,9 @@ fun AddMilkBottomSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = DIMENSIONS_24DP)
-                .padding(bottom = DIMENSIONS_48DP),
+                 // Ensures buttons are above the system navigation bar
+                .verticalScroll(scrollState) // Makes the sheet scrollable on smaller screens or when keyboard is up
+                .padding(start = DIMENSIONS_24DP, end = DIMENSIONS_24DP, top = DIMENSIONS_8DP, bottom = DIMENSIONS_16DP),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
