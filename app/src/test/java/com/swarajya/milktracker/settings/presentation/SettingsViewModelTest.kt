@@ -4,7 +4,9 @@ import android.app.Application
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import app.cash.turbine.test
+import com.swarajya.milktracker.common.constants.AnalyticsConstants
 import com.swarajya.milktracker.common.data.manager.PreferenceManager
+import com.swarajya.milktracker.common.domain.manager.AnalyticsManager
 import com.swarajya.milktracker.common.domain.manager.ThemeManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -15,8 +17,8 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentMatchers.anyInt
-import org.mockito.ArgumentMatchers.anyString
+import org.mockito.Captor
+import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito.*
 import org.mockito.MockitoAnnotations
@@ -38,6 +40,9 @@ class SettingsViewModelTest {
     @Mock
     private lateinit var packageManager: PackageManager
 
+    @Mock
+    private lateinit var analyticsManager: AnalyticsManager
+
     private lateinit var viewModel: SettingsViewModel
 
     private val isDarkThemeFlow = MutableStateFlow<Boolean?>(null)
@@ -47,16 +52,17 @@ class SettingsViewModelTest {
         MockitoAnnotations.openMocks(this)
         Dispatchers.setMain(testDispatcher)
 
-        // Default mock behaviors
         `when`(themeManager.isDarkTheme).thenReturn(isDarkThemeFlow)
         `when`(preferenceManager.isNotificationsEnabled).thenReturn(flowOf(true))
+        `when`(preferenceManager.pricePerLitre).thenReturn(flowOf(60.0f))
         `when`(application.packageManager).thenReturn(packageManager)
         `when`(application.packageName).thenReturn("com.swarajya.milktracker")
 
-        val packageInfo = PackageInfo().apply { versionName = "1.0.0" }
-        `when`(packageManager.getPackageInfo(anyString(), anyInt())).thenReturn(packageInfo)
+        val packageInfo = PackageInfo()
+        packageInfo.versionName = "1.0.0"
+        doReturn(packageInfo).`when`(packageManager).getPackageInfo("com.swarajya.milktracker", 0)
 
-        viewModel = SettingsViewModel(themeManager, preferenceManager, application)
+        viewModel = SettingsViewModel(themeManager, preferenceManager, analyticsManager, application)
     }
 
     @After
@@ -99,12 +105,20 @@ class SettingsViewModelTest {
     fun `onThemeChanged true delegation`() {
         viewModel.onThemeChanged(true)
         verify(themeManager).setTheme(true)
+        verify(analyticsManager, times(1)).logEvent(
+            AnalyticsConstants.Events.EVENT_TOGGLE,
+            mapOf(AnalyticsConstants.Keys.KEY_TOGGLE_STATE to "true")
+        )
     }
 
     @Test
     fun `onThemeChanged false delegation`() {
         viewModel.onThemeChanged(false)
         verify(themeManager).setTheme(false)
+        verify(analyticsManager, times(1)).logEvent(
+            AnalyticsConstants.Events.EVENT_TOGGLE,
+            mapOf(AnalyticsConstants.Keys.KEY_TOGGLE_STATE to "false")
+        )
     }
 
     @Test
@@ -112,6 +126,21 @@ class SettingsViewModelTest {
         viewModel.onNotificationToggle(false)
         advanceUntilIdle()
         verify(preferenceManager).setNotificationsEnabled(false)
+        verify(analyticsManager, times(1)).logEvent(
+            AnalyticsConstants.Events.EVENT_TOGGLE,
+            mapOf(AnalyticsConstants.Keys.KEY_TOGGLE_STATE to "false")
+        )
+    }
+
+    @Test
+    fun `onPriceChanged persistence call`() = runTest {
+        viewModel.onPriceChanged(70.0f)
+        advanceUntilIdle()
+        verify(preferenceManager).setPricePerLitre(70.0f)
+        verify(analyticsManager, times(1)).logEvent(
+            AnalyticsConstants.Events.EVENT_TEXT_CHANGE,
+            mapOf(AnalyticsConstants.Keys.KEY_TEXT_VALUE to "70.0")
+        )
     }
 
     @Test
@@ -121,10 +150,18 @@ class SettingsViewModelTest {
 
     @Test
     fun `appVersion returns Unknown when package manager throws exception`() {
-        `when`(packageManager.getPackageInfo(anyString(), anyInt())).thenThrow(RuntimeException())
-        
-        // Re-instantiate to trigger init block
-        val vm = SettingsViewModel(themeManager, preferenceManager, application)
+        doThrow(RuntimeException()).`when`(packageManager).getPackageInfo("com.swarajya.milktracker", 0)
+
+        val vm = SettingsViewModel(themeManager, preferenceManager, analyticsManager, application)
         assertEquals("Unknown", vm.appVersion)
+    }
+
+    @Test
+    fun `logScreenViewEvent logs correct event`() {
+        viewModel.logScreenViewEvent()
+        verify(analyticsManager).logEvent(
+            AnalyticsConstants.Events.EVENT_SCREEN_VIEW,
+            mapOf(AnalyticsConstants.Keys.KEY_SCREEN_NAME to AnalyticsConstants.Params.PARAM_SETTING)
+        )
     }
 }

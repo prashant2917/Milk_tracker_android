@@ -1,7 +1,9 @@
 package com.swarajya.milktracker.tracker.presentation.viewmodel
 
 import app.cash.turbine.test
+import com.swarajya.milktracker.common.constants.AnalyticsConstants
 import com.swarajya.milktracker.common.data.manager.PreferenceManager
+import com.swarajya.milktracker.common.domain.manager.AnalyticsManager
 import com.swarajya.milktracker.tracker.data.MilkLogEntity
 import com.swarajya.milktracker.tracker.domain.usecase.DeleteLogUseCase
 import com.swarajya.milktracker.tracker.domain.usecase.GetLogsForMonthUseCase
@@ -36,6 +38,9 @@ class TrackerViewModelTest {
     @Mock
     private lateinit var preferenceManager: PreferenceManager
 
+    @Mock
+    private lateinit var analyticsManager: AnalyticsManager
+
     private lateinit var viewModel: TrackerViewModel
 
     @Before
@@ -51,7 +56,8 @@ class TrackerViewModelTest {
             insertOrUpdateLogUseCase,
             getLogsForMonthUseCase,
             deleteLogUseCase,
-            preferenceManager
+            preferenceManager,
+            analyticsManager
         )
     }
 
@@ -152,5 +158,102 @@ class TrackerViewModelTest {
         viewModel.defaultPrice.test {
             assertEquals(60.0f, awaitItem())
         }
+    }
+
+    @Test
+    fun `onToggleBottomSheet logs analytics event`() {
+        viewModel.onToggleBottomSheet(true)
+        verify(analyticsManager, times(1)).logEvent(
+            AnalyticsConstants.Events.EVENT_SCREEN_VIEW,
+            mapOf(AnalyticsConstants.Keys.KEY_SCREEN_NAME to AnalyticsConstants.Params.PARAM_ADD_MILK_ENTRY_BOTTOM_SHEET)
+        )
+    }
+
+    @Test
+    fun `deleteMilkLog emits Error event on exception`() = runTest {
+        val date = "2023-10-27"
+        whenever(deleteLogUseCase.invoke(date)).thenThrow(RuntimeException())
+
+        viewModel.uiEvent.test {
+            viewModel.deleteMilkLog(date)
+            advanceUntilIdle()
+            assertEquals(TrackerViewModel.UiEvent.Error, awaitItem())
+        }
+    }
+
+    @Test
+    fun `logScreenViewEvent logs correct event`() {
+        viewModel.logScreenViewEvent()
+        verify(analyticsManager, times(1)).logEvent(
+            AnalyticsConstants.Events.EVENT_SCREEN_VIEW,
+            mapOf(AnalyticsConstants.Keys.KEY_SCREEN_NAME to AnalyticsConstants.Params.PARAM_MONTHLY_CALENDAR)
+        )
+    }
+
+    @Test
+    fun `logMonthChangeEvent logs correct button click event`() {
+        val paramValue = AnalyticsConstants.Params.PARAM_PREV_MONTH
+        viewModel.logMonthChangeEvent(paramValue)
+        verify(analyticsManager, times(1)).logEvent(
+            AnalyticsConstants.Events.EVENT_BUTTON_CLICK,
+            mapOf(AnalyticsConstants.Keys.KEY_BUTTON_NAME to paramValue)
+        )
+    }
+
+    @Test
+    fun `logCalendarCellClickEvent logs correct button click event`() {
+        val paramValue = AnalyticsConstants.Params.PARAM_DAY
+        viewModel.logCalendarCellClickEvent(paramValue)
+        verify(analyticsManager, times(1)).logEvent(
+            AnalyticsConstants.Events.EVENT_BUTTON_CLICK,
+            mapOf(AnalyticsConstants.Keys.KEY_BUTTON_NAME to paramValue)
+        )
+    }
+
+    @Test
+    fun `logSaveClickEvent logs save button click event`() {
+        viewModel.logSaveClickEvent()
+        verify(analyticsManager, times(1)).logEvent(
+            AnalyticsConstants.Events.EVENT_BUTTON_CLICK,
+            mapOf(AnalyticsConstants.Keys.KEY_BUTTON_NAME to AnalyticsConstants.Params.PARAM_BUTTON_SAVE)
+        )
+    }
+
+    @Test
+    fun `logDeleteClickEvent logs delete button click event`() {
+        viewModel.logDeleteClickEvent()
+        verify(analyticsManager, times(1)).logEvent(
+            AnalyticsConstants.Events.EVENT_BUTTON_CLICK,
+            mapOf(AnalyticsConstants.Keys.KEY_BUTTON_NAME to AnalyticsConstants.Params.PARAM_BUTTON_DELETE)
+        )
+    }
+
+    @Test
+    fun `logCancelClickEvent logs cancel button click event`() {
+        viewModel.logCancelClickEvent()
+        verify(analyticsManager, times(1)).logEvent(
+            AnalyticsConstants.Events.EVENT_BUTTON_CLICK,
+            mapOf(AnalyticsConstants.Keys.KEY_BUTTON_NAME to AnalyticsConstants.Params.PARAM_BUTTON_CANCEL)
+        )
+    }
+
+    @Test
+    fun `logQuantityChangeClickEvent logs correct button click event`() {
+        val paramValue = AnalyticsConstants.Params.PARAM_BUTTON_PLUS
+        viewModel.logQuantityChangeClickEvent(paramValue)
+        verify(analyticsManager, times(1)).logEvent(
+            AnalyticsConstants.Events.EVENT_BUTTON_CLICK,
+            mapOf(AnalyticsConstants.Keys.KEY_BUTTON_NAME to paramValue)
+        )
+    }
+
+    @Test
+    fun `logPriceChangeClickEvent logs text change event`() {
+        val paramValue = "70.0"
+        viewModel.logPriceChangeClickEvent(paramValue)
+        verify(analyticsManager, times(1)).logEvent(
+            AnalyticsConstants.Events.EVENT_TEXT_CHANGE,
+            mapOf(AnalyticsConstants.Keys.KEY_TEXT_VALUE to paramValue)
+        )
     }
 }
