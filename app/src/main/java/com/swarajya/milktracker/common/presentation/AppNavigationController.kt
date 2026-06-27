@@ -16,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -36,9 +37,9 @@ fun AppNavigationController(modifier: Modifier) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
-
     val showTopBar = currentDestination?.hasRoute<Splash>() == false
     val isSettingsScreen = currentDestination?.hasRoute<Settings>() == true
+    val appNavigationViewModel: AppNavigationViewModel = hiltViewModel()
 
     // Notification Permission Launcher for Android 13+
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -54,14 +55,17 @@ fun AppNavigationController(modifier: Modifier) {
                 CenterAlignedTopAppBar(
                     title = {
                         Text(
-                            text = if (isSettingsScreen) stringResource(id = R.string.settings) 
-                                   else stringResource(id = R.string.app_name),
+                            text = if (isSettingsScreen) stringResource(id = R.string.settings)
+                            else stringResource(id = R.string.app_name),
                             fontWeight = FontWeight.Bold
                         )
                     },
                     navigationIcon = {
                         if (isSettingsScreen) {
-                            IconButton(onClick = { navController.navigateUp() }) {
+                            IconButton(onClick = {
+                                appNavigationViewModel.logBackClickEvent()
+                                navController.navigateUp()
+                            }) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                     contentDescription = "Back"
@@ -71,7 +75,10 @@ fun AppNavigationController(modifier: Modifier) {
                     },
                     actions = {
                         if (!isSettingsScreen) {
-                            IconButton(onClick = { navController.navigate(Settings) }) {
+                            IconButton(onClick = {
+                                appNavigationViewModel.logSettingClickEvent()
+                                navController.navigate(Settings)
+                            }) {
                                 Icon(
                                     imageVector = Icons.Default.Settings,
                                     contentDescription = "Settings"

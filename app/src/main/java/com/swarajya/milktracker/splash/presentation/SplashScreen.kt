@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.swarajya.milktracker.R
 import com.swarajya.milktracker.common.presentation.theme.DIMENSIONS_0DP
 import com.swarajya.milktracker.common.presentation.theme.DIMENSIONS_8DP
@@ -25,12 +26,14 @@ private const val SPLASH_SCREEN_DELAY = 2000L
 
 @Composable
 fun SplashScreen(
+    modifier: Modifier = Modifier,
     onNavigateNext: () -> Unit,
-    modifier: Modifier = Modifier
+    viewModel: SplashViewModel = hiltViewModel(),
 ) {
     var isLoadingVisible by rememberSaveable { mutableStateOf(true) }
 
     LaunchedEffect(key1 = true) {
+        viewModel.logSplashScreenOpenEvent()
         delay(SPLASH_SCREEN_DELAY)
         isLoadingVisible = false
         onNavigateNext()
